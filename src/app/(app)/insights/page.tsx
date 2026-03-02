@@ -8,20 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { TruncatedPagination } from "@/components/truncated-pagination";
 import { TableSkeleton } from "@/components/loading-skeleton";
 import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
 import { useFetch } from "@/hooks/use-fetch";
 import { useDebounce } from "@/hooks/use-debounce";
 import type { InsightReport, ApiListResponse } from "@/lib/types";
-
-const severityVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  "緊急": "destructive",
-  "高": "default",
-  "中": "secondary",
-  "低": "outline",
-};
+import { severityVariant } from "@/lib/badge-variants";
 
 export default function InsightsPage() {
   const [search, setSearch] = useState("");
@@ -172,23 +166,7 @@ export default function InsightsPage() {
             </TableBody>
           </Table>
           </div>
-          {data.meta.total_pages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious onClick={() => setPage(Math.max(1, page - 1))} className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
-                </PaginationItem>
-                {Array.from({ length: data.meta.total_pages }, (_, i) => i + 1).map((p) => (
-                  <PaginationItem key={p}>
-                    <PaginationLink onClick={() => setPage(p)} isActive={page === p} className="cursor-pointer">{p}</PaginationLink>
-                  </PaginationItem>
-                ))}
-                <PaginationItem>
-                  <PaginationNext onClick={() => setPage(Math.min(data.meta.total_pages, page + 1))} className={page === data.meta.total_pages ? "pointer-events-none opacity-50" : "cursor-pointer"} />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+          <TruncatedPagination page={page} totalPages={data.meta.total_pages} onPageChange={setPage} />
         </>
       )}
     </div>

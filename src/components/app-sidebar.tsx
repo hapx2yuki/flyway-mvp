@@ -10,6 +10,7 @@ import {
   Activity,
   FileSearch,
   FileText,
+  Bell,
   Settings,
 } from "lucide-react";
 import {
@@ -32,6 +33,7 @@ const navItems = [
   { label: "市場モニタリング", icon: Activity, path: "/monitoring" },
   { label: "分析リクエスト", icon: FileSearch, path: "/requests" },
   { label: "レポート", icon: FileText, path: "/reports" },
+  { label: "通知", icon: Bell, path: "/notifications" },
   { label: "設定", icon: Settings, path: "/settings" },
 ];
 

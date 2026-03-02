@@ -13,15 +13,9 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { DetailSkeleton } from "@/components/loading-skeleton";
 import { ErrorState } from "@/components/error-state";
 import { useFetch } from "@/hooks/use-fetch";
-import { toast } from "sonner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { InsightReport } from "@/lib/types";
-
-const severityVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  "緊急": "destructive",
-  "高": "default",
-  "中": "secondary",
-  "低": "outline",
-};
+import { severityVariant } from "@/lib/badge-variants";
 
 export default function InsightDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -41,7 +35,7 @@ export default function InsightDetailPage({ params }: { params: Promise<{ id: st
           <BreadcrumbSeparator />
           <BreadcrumbItem><BreadcrumbLink href="/insights">インサイト</BreadcrumbLink></BreadcrumbItem>
           <BreadcrumbSeparator />
-          <BreadcrumbItem><BreadcrumbPage>{insight.title.substring(0, 30)}...</BreadcrumbPage></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbPage>{insight.title.length > 30 ? insight.title.substring(0, 30) + "…" : insight.title}</BreadcrumbPage></BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
 
@@ -61,12 +55,30 @@ export default function InsightDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <Button variant="outline" onClick={() => toast.success("エクスポート処理を開始しました")}>
-            <Download className="h-4 w-4 mr-1" />エクスポート
-          </Button>
-          <Button variant="outline" onClick={() => toast.success("ブックマークに追加しました")}>
-            <Bookmark className="h-4 w-4 mr-1" />ブックマーク
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button variant="outline" disabled>
+                    <Download className="h-4 w-4 mr-1" />エクスポート
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>デモ版では利用できません</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button variant="outline" disabled>
+                    <Bookmark className="h-4 w-4 mr-1" />ブックマーク
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>デモ版では利用できません</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </div>
 

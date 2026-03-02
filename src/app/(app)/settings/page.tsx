@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -24,15 +24,46 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState("ja-JP");
   const [timezone, setTimezone] = useState("Asia/Tokyo");
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("medisearch-settings");
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.name !== undefined) setName(s.name);
+        if (s.email !== undefined) setEmail(s.email);
+        if (s.role !== undefined) setRole(s.role);
+        if (s.alertEmail !== undefined) setAlertEmail(s.alertEmail);
+        if (s.alertPush !== undefined) setAlertPush(s.alertPush);
+        if (s.insightEmail !== undefined) setInsightEmail(s.insightEmail);
+        if (s.insightPush !== undefined) setInsightPush(s.insightPush);
+        if (s.systemEmail !== undefined) setSystemEmail(s.systemEmail);
+        if (s.systemPush !== undefined) setSystemPush(s.systemPush);
+        if (s.language !== undefined) setLanguage(s.language);
+        if (s.timezone !== undefined) setTimezone(s.timezone);
+      }
+    } catch { /* ignore parse errors */ }
+  }, []);
+
+  const persistSettings = (patch: Record<string, unknown>) => {
+    try {
+      const saved = localStorage.getItem("medisearch-settings");
+      const current = saved ? JSON.parse(saved) : {};
+      localStorage.setItem("medisearch-settings", JSON.stringify({ ...current, ...patch }));
+    } catch { /* ignore */ }
+  };
+
   const handleSaveProfile = () => {
+    persistSettings({ name, email, role });
     toast.success("プロフィールを保存しました");
   };
 
   const handleSaveNotifications = () => {
+    persistSettings({ alertEmail, alertPush, insightEmail, insightPush, systemEmail, systemPush });
     toast.success("通知設定を保存しました");
   };
 
   const handleSaveGeneral = () => {
+    persistSettings({ language, timezone });
     toast.success("一般設定を保存しました");
   };
 

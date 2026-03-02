@@ -13,17 +13,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { DetailSkeleton } from "@/components/loading-skeleton";
 import { ErrorState } from "@/components/error-state";
 import { useFetch } from "@/hooks/use-fetch";
-import { toast } from "sonner";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from "recharts";
 import type { HCP } from "@/lib/types";
 
-const prescriptionData = [
-  { month: "10月", volume: 38 },
-  { month: "11月", volume: 42 },
-  { month: "12月", volume: 35 },
-  { month: "1月", volume: 48 },
-  { month: "2月", volume: 52 },
-];
+function generatePrescriptionData(baseVolume: number) {
+  const months = ["10月", "11月", "12月", "1月", "2月"];
+  return months.map((month, i) => ({
+    month,
+    volume: Math.round(baseVolume * (0.8 + (i * 0.05) + Math.sin(i * 1.5) * 0.15)),
+  }));
+}
 
 export default function HCPDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -34,6 +33,7 @@ export default function HCPDetailPage({ params }: { params: Promise<{ id: string
   if (!data) return <DetailSkeleton />;
 
   const hcp = data.data;
+  const prescriptionData = generatePrescriptionData(hcp.prescription_volume / 5);
 
   return (
     <div className="space-y-6">
@@ -67,9 +67,18 @@ export default function HCPDetailPage({ params }: { params: Promise<{ id: string
           </div>
         </div>
         <div className="flex gap-2 shrink-0">
-          <Button onClick={() => toast.success("ターゲットリストに追加しました")}>
-            <UserPlus className="h-4 w-4 mr-1" />ターゲットリストに追加
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button disabled>
+                    <UserPlus className="h-4 w-4 mr-1" />ターゲットリストに追加
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>デモ版では利用できません</TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
           <Button variant="outline" asChild>
             <Link href="/requests"><FileSearch className="h-4 w-4 mr-1" />深掘り分析を依頼</Link>
           </Button>
@@ -104,7 +113,7 @@ export default function HCPDetailPage({ params }: { params: Promise<{ id: string
                     <XAxis dataKey="month" />
                     <YAxis />
                     <RechartsTooltip />
-                    <Bar dataKey="volume" fill="hsl(var(--chart-1))" name="処方件数" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="volume" fill="var(--chart-1)" name="処方件数" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

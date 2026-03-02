@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Lightbulb, Package, Users, AlertTriangle, TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { Lightbulb, Package, Users, AlertTriangle, TrendingDown, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,21 +26,16 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { severityVariant } from "@/lib/badge-variants";
 
 const CHART_COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
 ];
 
-const severityVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  "緊急": "destructive",
-  "高": "default",
-  "中": "secondary",
-  "低": "outline",
-};
 
 interface DashboardData {
   data: {
@@ -74,7 +69,7 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const [period, setPeriod] = useState("30");
-  const { data, error, isLoading, mutate } = useFetch<DashboardData>("/api/dashboard");
+  const { data, error, isLoading, mutate } = useFetch<DashboardData>(`/api/dashboard?period=${period}`);
 
   if (isLoading) return <DashboardSkeleton />;
   if (error) return <ErrorState message={error} onRetry={mutate} />;
@@ -97,10 +92,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.new_insights}</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <TrendingUp className="h-3 w-3 text-green-500" aria-hidden="true" />
-              前月比 +20%
-            </p>
+            <p className="text-xs text-muted-foreground">直近の新規インサイト数</p>
           </CardContent>
         </Card>
         <Card>
@@ -120,10 +112,7 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.hcp_coverage}%</div>
-            <p className="text-xs text-muted-foreground flex items-center gap-1">
-              <TrendingUp className="h-3 w-3 text-green-500" aria-hidden="true" />
-              アクセス良好のHCP割合
-            </p>
+            <p className="text-xs text-muted-foreground">アクセス良好のHCP割合</p>
           </CardContent>
         </Card>
         <Card>
@@ -281,8 +270,8 @@ export default function DashboardPage() {
                     <Area
                       type="monotone"
                       dataKey="count"
-                      stroke="hsl(var(--chart-1))"
-                      fill="hsl(var(--chart-1))"
+                      stroke="var(--chart-1)"
+                      fill="var(--chart-1)"
                       fillOpacity={0.2}
                       name="検出数"
                     />

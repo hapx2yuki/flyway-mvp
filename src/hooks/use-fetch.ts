@@ -25,30 +25,27 @@ export function useFetch<T>(url: string | null): UseFetchResult<T> {
       return;
     }
 
-    let cancelled = false;
+    const controller = new AbortController();
     setIsLoading(true);
     setError(null);
 
-    fetch(url)
+    fetch(url, { signal: controller.signal })
       .then((res) => {
         if (!res.ok) throw new Error(`API エラー: ${res.status}`);
         return res.json();
       })
       .then((json) => {
-        if (!cancelled) {
-          setData(json);
-          setIsLoading(false);
-        }
+        setData(json);
+        setIsLoading(false);
       })
       .catch((err) => {
-        if (!cancelled) {
-          setError(err.message || "データの取得に失敗しました");
-          setIsLoading(false);
-        }
+        if (err.name === "AbortError") return;
+        setError(err.message || "データの取得に失敗しました");
+        setIsLoading(false);
       });
 
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, [url, refreshKey]);
 

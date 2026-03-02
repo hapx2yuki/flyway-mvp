@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { TruncatedPagination } from "@/components/truncated-pagination";
 import { TableSkeleton } from "@/components/loading-skeleton";
 import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
@@ -18,10 +18,7 @@ import { useFetch } from "@/hooks/use-fetch";
 import { useDebounce } from "@/hooks/use-debounce";
 import { toast } from "sonner";
 import type { MonitoringAlert, ApiListResponse } from "@/lib/types";
-
-const severityVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
-  "緊急": "destructive", "高": "default", "中": "secondary", "低": "outline",
-};
+import { severityVariant } from "@/lib/badge-variants";
 const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   "未対応": "destructive", "対応中": "default", "対応済み": "secondary", "アーカイブ": "outline",
 };
@@ -181,17 +178,7 @@ export default function MonitoringPage() {
               </div>
             </TabsContent>
           </Tabs>
-          {data.meta.total_pages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem><PaginationPrevious onClick={() => setPage(Math.max(1, page - 1))} className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-                {Array.from({ length: data.meta.total_pages }, (_, i) => i + 1).map((p) => (
-                  <PaginationItem key={p}><PaginationLink onClick={() => setPage(p)} isActive={page === p} className="cursor-pointer">{p}</PaginationLink></PaginationItem>
-                ))}
-                <PaginationItem><PaginationNext onClick={() => setPage(Math.min(data.meta.total_pages, page + 1))} className={page === data.meta.total_pages ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+          <TruncatedPagination page={page} totalPages={data.meta.total_pages} onPageChange={setPage} />
         </>
       )}
     </div>

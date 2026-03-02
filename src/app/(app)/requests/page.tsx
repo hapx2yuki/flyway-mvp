@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { TruncatedPagination } from "@/components/truncated-pagination";
 import { TableSkeleton } from "@/components/loading-skeleton";
 import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
@@ -21,7 +21,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import type { AnalysisRequest, ApiListResponse } from "@/lib/types";
+import type { AnalysisRequest, Brand, ApiListResponse } from "@/lib/types";
 
 const statusVariant: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
   "下書き": "outline", "提出済み": "secondary", "分析中": "default", "完了": "default", "キャンセル": "destructive",
@@ -65,6 +65,8 @@ export default function RequestsPage() {
   }, [page, sortBy, order, debouncedSearch, statusFilter, priorityFilter]);
 
   const { data, error, isLoading, mutate } = useFetch<ApiListResponse<AnalysisRequest>>(url);
+  const { data: brandsData } = useFetch<ApiListResponse<Brand>>("/api/brands?per_page=100");
+  const brands = brandsData?.data ?? [];
 
   const form = useForm<RequestFormValues>({
     resolver: zodResolver(requestFormSchema),
@@ -76,7 +78,7 @@ export default function RequestsPage() {
       const res = await fetch("/api/requests", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, brand_name: "ブランド", status: "提出済み" }),
+        body: JSON.stringify({ ...values, brand_name: brands.find((b) => b.id === values.brand_id)?.name ?? values.brand_id, status: "提出済み" }),
       });
       if (!res.ok) throw new Error();
       toast.success("分析リクエストを作成しました");
@@ -153,7 +155,16 @@ export default function RequestsPage() {
                   )} />
                 </div>
                 <FormField control={form.control} name="brand_id" render={({ field }) => (
-                  <FormItem><FormLabel>対象ブランド <span className="text-destructive">*</span></FormLabel><FormControl><Input {...field} placeholder="ブランドIDを入力" /></FormControl><FormMessage /></FormItem>
+                  <FormItem><FormLabel>対象ブランド <span className="text-destructive">*</span></FormLabel><FormControl>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <SelectTrigger><SelectValue placeholder="ブランドを選択" /></SelectTrigger>
+                      <SelectContent>
+                        {brands.map((b) => (
+                          <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl><FormMessage /></FormItem>
                 )} />
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? "送信中..." : "リクエストを送信"}
@@ -231,7 +242,13 @@ export default function RequestsPage() {
                       </AlertDialog>
                     )}
                     {req.status === "完了" && req.result_summary && (
-                      <Button variant="outline" size="sm" onClick={() => toast.success("結果レポートを表示しました")}>結果を見る</Button>
+                      <Dialog>
+                        <DialogTrigger asChild><Button variant="outline" size="sm">結果を見る</Button></DialogTrigger>
+                        <DialogContent className="max-w-lg">
+                          <DialogHeader><DialogTitle>{req.title} — 分析結果</DialogTitle></DialogHeader>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap">{req.result_summary}</p>
+                        </DialogContent>
+                      </Dialog>
                     )}
                   </TableCell>
                 </TableRow>
@@ -239,17 +256,7 @@ export default function RequestsPage() {
             </TableBody>
           </Table>
           </div>
-          {data.meta.total_pages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem><PaginationPrevious onClick={() => setPage(Math.max(1, page - 1))} className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-                {Array.from({ length: data.meta.total_pages }, (_, i) => i + 1).map((p) => (
-                  <PaginationItem key={p}><PaginationLink onClick={() => setPage(p)} isActive={page === p} className="cursor-pointer">{p}</PaginationLink></PaginationItem>
-                ))}
-                <PaginationItem><PaginationNext onClick={() => setPage(Math.min(data.meta.total_pages, page + 1))} className={page === data.meta.total_pages ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+          <TruncatedPagination page={page} totalPages={data.meta.total_pages} onPageChange={setPage} />
         </>
       )}
     </div>

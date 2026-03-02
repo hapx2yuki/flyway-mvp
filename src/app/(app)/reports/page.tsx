@@ -7,13 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { TruncatedPagination } from "@/components/truncated-pagination";
 import { CardSkeleton } from "@/components/loading-skeleton";
 import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
 import { useFetch } from "@/hooks/use-fetch";
 import { useDebounce } from "@/hooks/use-debounce";
-import { toast } from "sonner";
 import type { InsightReport, ApiListResponse } from "@/lib/types";
 
 const typeVariant: Record<string, "default" | "secondary" | "outline"> = {
@@ -121,25 +121,24 @@ export default function ReportsPage() {
                     <span className="font-medium">{new Date(report.created_at).toLocaleDateString("ja-JP")}</span>
                   </div>
                   <div className="pt-2">
-                    <Button variant="outline" size="sm" className="w-full" onClick={() => toast.success("レポートをエクスポートしました")}>
-                      <Download className="h-4 w-4 mr-1" />エクスポート
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={0} className="w-full">
+                            <Button variant="outline" size="sm" className="w-full" disabled>
+                              <Download className="h-4 w-4 mr-1" />エクスポート
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent>デモ版では利用できません</TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
-          {data.meta.total_pages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem><PaginationPrevious onClick={() => setPage(Math.max(1, page - 1))} className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-                {Array.from({ length: data.meta.total_pages }, (_, i) => i + 1).map((p) => (
-                  <PaginationItem key={p}><PaginationLink onClick={() => setPage(p)} isActive={page === p} className="cursor-pointer">{p}</PaginationLink></PaginationItem>
-                ))}
-                <PaginationItem><PaginationNext onClick={() => setPage(Math.min(data.meta.total_pages, page + 1))} className={page === data.meta.total_pages ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+          <TruncatedPagination page={page} totalPages={data.meta.total_pages} onPageChange={setPage} />
         </>
       )}
     </div>

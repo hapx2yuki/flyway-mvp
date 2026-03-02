@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import { TruncatedPagination } from "@/components/truncated-pagination";
 import { TableSkeleton } from "@/components/loading-skeleton";
 import { ErrorState } from "@/components/error-state";
 import { EmptyState } from "@/components/empty-state";
@@ -139,17 +139,7 @@ export default function NotificationsPage() {
               ))}
             </div>
           </ScrollArea>
-          {data.meta.total_pages > 1 && (
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem><PaginationPrevious onClick={() => setPage(Math.max(1, page - 1))} className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-                {Array.from({ length: data.meta.total_pages }, (_, i) => i + 1).map((p) => (
-                  <PaginationItem key={p}><PaginationLink onClick={() => setPage(p)} isActive={page === p} className="cursor-pointer">{p}</PaginationLink></PaginationItem>
-                ))}
-                <PaginationItem><PaginationNext onClick={() => setPage(Math.min(data.meta.total_pages, page + 1))} className={page === data.meta.total_pages ? "pointer-events-none opacity-50" : "cursor-pointer"} /></PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
+          <TruncatedPagination page={page} totalPages={data.meta.total_pages} onPageChange={setPage} />
         </>
       )}
     </div>
