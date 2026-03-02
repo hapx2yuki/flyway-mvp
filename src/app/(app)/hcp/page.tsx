@@ -88,6 +88,7 @@ export default function HCPPage() {
       ) : (
         <>
           <p className="text-sm text-muted-foreground">全{data.meta.total}件中 {(data.meta.page - 1) * data.meta.per_page + 1}-{Math.min(data.meta.page * data.meta.per_page, data.meta.total)}件を表示</p>
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -119,6 +120,7 @@ export default function HCPPage() {
               ))}
             </TableBody>
           </Table>
+          </div>
           {data.meta.total_pages > 1 && (
             <Pagination>
               <PaginationContent>

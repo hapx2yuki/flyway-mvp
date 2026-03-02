@@ -121,7 +121,7 @@ export default function MonitoringPage() {
                       <CardContent className="pt-4">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
                               <Badge variant={severityVariant[alert.severity] || "outline"}>{alert.severity}</Badge>
                               <Badge variant="outline">{alert.category}</Badge>
                               <Badge variant={statusVariant[alert.status] || "outline"}>{alert.status}</Badge>
@@ -148,6 +148,7 @@ export default function MonitoringPage() {
               </ScrollArea>
             </TabsContent>
             <TabsContent value="table">
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -177,6 +178,7 @@ export default function MonitoringPage() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </TabsContent>
           </Tabs>
           {data.meta.total_pages > 1 && (

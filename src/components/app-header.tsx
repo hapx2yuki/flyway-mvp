@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,8 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 export function AppHeader() {
+  const router = useRouter();
+
   return (
     <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4" style={{ zIndex: "var(--z-header)" }}>
       <SidebarTrigger className="-ml-1" />
@@ -40,7 +43,7 @@ export function AppHeader() {
           <DropdownMenuItem asChild>
             <Link href="/settings">プロフィール設定</Link>
           </DropdownMenuItem>
-          <DropdownMenuItem>ログアウト</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/login")}>ログアウト</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </header>
